@@ -1,1 +1,2 @@
-# mu_Repo
+Implementation of Logistic Regression using R
+
