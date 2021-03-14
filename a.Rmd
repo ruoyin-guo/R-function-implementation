@@ -1,6 +1,6 @@
 ---
-title: "A3Q1a"
-output: github_document
+title: "Implementation of Logistic Regression using R"
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -9,7 +9,18 @@ library(readr)
 library(tidyverse)
 library(knitr)
 ```
+
+
+Assume that we have observed two predictors, Xi1 and Xi2 and want to predict a binary outcome Yi (i.e. Yi = 0 or Yi = 1).
+A logistic regression model assumes that the probability that Yi = 1 can be modelled using the following function of Xi1 = xi1 and Xi2 = xi2.
+Pr(Yi = 1|Xi1 = xi1, Xi2 = xi2, θ1, θ2, θ3) = p(xi1, xi2) = 1/ (1 + exp(−xi1θ1 − xi2θ2 − θ3)).
+
+
 Part a
+Write a function to compute p(x1, x2) for n observations which takes as arguments:
+i) A vector of three parameters θ = (θ1, θ2, θ3).
+ii) Two predictor vectors, x1 = (x1,1, ..., xn,1) and x2 = (x1,2, ...xn,2)
+and returns a length n vector corresponding to p(x11, p12), ...p(xn1, xn2) for the corresponding θ values
 
 ```{r a, echo=TRUE}
 
@@ -20,10 +31,13 @@ p_x1_x2 = function(theta,x1,x2){
 }
 
 
-
 ```
 
+
 Part b
+Write a function to compute L(θ1, θ2, θ3) cross-entropy loss:
+L(θ1, θ2, θ3) = −Xni=1[yi × log(p(xi1, xi2)) + (1 − yi) × log(1 − p(xi1, xi2))]
+
 ```{r b,echo=TRUE}
  comp_L = function(theta,x1,x2,y){
    total = sum(y*log(p_x1_x2(theta,x1,x2)) + (1-y)*log(1-p_x1_x2(theta,x1,x2)))
@@ -34,6 +48,10 @@ Part b
 
 
 Part c
+Fit a logistic regression classifier to the HTRU2 data.
+Using optim and your loss function from part (b), find the values of theta[1], theta[2],
+theta[3] that minimize the cross-entropy loss
+
 ```{r c, echo=TRUE}
 
 HTRU2 = read_csv("HTRU2_varnames.csv")
@@ -48,6 +66,8 @@ result$value
 
 
 Part d
+Compute the minimized cross-entropy loss for each possible pair of predictors for the HTRU2 data.
+Arrange the rows by the value of the loss to find create a table ordered from best pairs of predictors to worst pairs according to estimated loss.
 
 ```{r d,echo=TRUE}
 
@@ -81,6 +101,7 @@ output_tbl %>% arrange(Losses) %>% kable()
 
 
 Part e
+Produce the same tibble as in part (d), only using the var_combs matrix above and map_dfr(.)
 ```{r e, echo=TRUE }
 
 # convert matrix to df
