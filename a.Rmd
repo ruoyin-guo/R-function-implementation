@@ -1,0 +1,155 @@
+---
+title: "A3Q1a"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(tidyverse)
+library(knitr)
+```
+Part a
+
+```{r a, echo=TRUE}
+
+p_x1_x2 = function(theta,x1,x2){
+  
+  1/(1+exp(-x1*theta[1] - x2*theta[2]-theta[3]))
+  
+}
+
+
+
+```
+
+Part b
+```{r b,echo=TRUE}
+ comp_L = function(theta,x1,x2,y){
+   total = sum(y*log(p_x1_x2(theta,x1,x2)) + (1-y)*log(1-p_x1_x2(theta,x1,x2)))
+   -1*total
+
+ }
+```
+
+
+Part c
+```{r c, echo=TRUE}
+
+HTRU2 = read_csv("HTRU2_varnames.csv")
+
+result = with(HTRU2, 
+              optim(par=c(0,0,0), f=comp_L,x1 = Mean_IP, 
+               x2 = Mean_DMSNR,y=Class))
+
+result$par
+result$value
+```   
+
+
+Part d
+
+```{r d,echo=TRUE}
+
+var_combs<-combn(names(HTRU2[,-9]),2)
+var_combs
+Predictor1 = vector("character",28)
+Predictor2 = vector("character",28)
+Losses = vector("numeric",28)
+
+# creates tibble to store x1,x2, and losses
+output_tbl = tibble(Predictor1 = NULL,
+                    Predictor2 = NULL,
+                    Losses = NULL)
+
+for (i in 1:28){
+  x1 = HTRU2 %>% select(var_combs[1,i])
+  x2 = HTRU2 %>% select(var_combs[2,i])
+  result = with(HTRU2,optim(par=c(0,0,0), f=comp_L,
+                 x1=x1, 
+                 x2=x2,
+               y=Class))
+  Predictor1[i] = var_combs[1,i]
+  Predictor2[i] = var_combs[2,i]
+  Losses[i] = result$value
+}
+
+output_tbl = tibble(Predictor1,Predictor2,Losses)
+output_tbl %>% arrange(Losses) %>% kable()
+
+```   
+
+
+Part e
+```{r e, echo=TRUE }
+
+# convert matrix to df
+var_combs_df = as.data.frame(var_combs)
+var_combs_df
+
+
+map_func = function(var_combs_df){
+  x1 = HTRU2 %>% select(var_combs_df[1])
+  
+  x2 = HTRU2 %>% select(var_combs_df[2])
+  result = with(HTRU2,optim(par=c(0,0,0), f=comp_L,
+                 x1=x1, 
+                 x2=x2,
+               y=Class))
+  Predictor1 = var_combs_df[1]
+  Predictor2 = var_combs_df[2]
+  Losses = result$value
+  output = data.frame(Predictor1,Predictor2,Losses)
+}
+
+var_combs_df %>% map_dfr(map_func) %>% arrange(Losses) %>% kable()
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
